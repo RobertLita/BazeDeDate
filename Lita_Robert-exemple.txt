@@ -1,0 +1,186 @@
+
+--11)
+--i) Să se afișeze numele, prenumele, data internarii, 
+asistentul care se ocupă de ei și diagnosticul pacienților care s-au internat în 2021, 
+ordonați după aceasta data.
+
+select p.nume || ' ' || p.prenume as "Nume pacient", p.data_internare, c.diagnostic, a.nume || ' ' || a.prenume as "Nume asistent"
+from pacient p
+join fisa_medicala fm
+on p.fisa_id = fm.fisa_id
+join consultatie c
+on c.consultatie_id = fm.consultatie_id 
+join salon s
+on s.salon_id = p.salon_id
+join asistent a
+on a.asistent_id = s.asistent_id
+where to_char(p.data_internare,'YYYY') >= '2019'
+order by p.data_internare;
+
+--ii) Să se afișeze numele, prenumele și de câte saloane se ocupă asistenții din subordinea doctorului cu numele “Popescu”.
+with subordonati as(
+    select asistent_id 
+    from asistent a
+    join doctor d
+    on d.doctor_id = a.doctor_id
+    where lower(d.nume) = 'popescu'
+)
+ 
+select a.nume || ' ' || a.prenume as "Nume asistent", count(s.salon_id) as "Numar saloane"
+from asistent a
+join salon s
+on s.asistent_id = a.asistent_id
+group by a.nume, a.prenume, a.asistent_id
+having a.asistent_id = ANY (select * from subordonati)
+
+--iii)Pentru pacienții care nu au dată de externare, să se afișeze data la care aceștia ar putea fi externați 
+cunoscându-se pentru fiecare cât durează tratamentul și știind că aceștia trebuie să se recupereze până la finalul lunii respective.
+
+select p.nume || ' ' || p.prenume as "Nume pacient", last_day(nvl(p.data_externare, p.data_internare) + t.durata) as "Data externare posibila"
+from pacient p
+join fisa_medicala fm
+on fm.fisa_id = p.fisa_id
+join tratament t
+on t.tratament_id = fm.tratament_id
+where p.data_externare is null
+
+--iv)Pentru pacienții care sunt îngrijiți de un asistent al cărui doctor câștigă peste 20000 de lei, 
+să se afișeze numele zilei din săptămână în care au fost internați 
+și “Gratis” dacă tratamentul a fost gratis sau “Contra cost” în caz contrar.
+
+select p.nume || ' ' || p.prenume as "Nume pacient", 
+ 
+CASE p.data_internare
+WHEN next_day(data_internare,'Sunday') - 7
+THEN 'Duminica'
+WHEN next_day(data_internare,'Saturday') - 7
+THEN 'Sambata'
+WHEN next_day(data_internare,'Friday') - 7
+THEN 'Vineri'
+WHEN next_day(data_internare,'Thursday') - 7
+THEN 'Joi'
+WHEN next_day(data_internare,'Wednesday') - 7
+THEN 'Miercuri'
+WHEN next_day(data_internare,'Tuesday') - 7
+THEN 'Marti'
+ELSE 'Luni'
+END as "Ziua internarii", 
+ 
+DECODE(t.cost, 0, 'Gratis','Contra cost') Tratament
+ 
+from pacient p
+join fisa_medicala fm
+on p.fisa_id = fm.fisa_id
+join tratament t
+on t.tratament_id = fm.tratament_id
+where p.salon_id = ANY (
+    select salon_id
+    from salon s
+    join asistent a on a.asistent_id = s.asistent_id
+    join doctor d
+    on d.doctor_id = a.doctor_id
+    where salariu > 15000
+)
+
+--v)Să se afișeze numele, inițiala și salariul căror salariu 
+depăşeşte valoarea medie a salariilor colegilor săi de specializare.
+
+select cel_afis.nume || ' ' || SUBSTR(cel_afis.prenume, 0, 1) as "Nume + initiala prenume", cel_afis.salariu
+from doctor cel_afis
+where salariu > (select avg(salariu)
+                from doctor 
+                where specializare = cel_afis.specializare)
+
+
+--12)
+   --i)Pentru pacienții cu observații, durata tratamentului să se mărească cu 2 zile.
+
+UPDATE tratament
+SET durata = durata + 2
+WHERE tratament_id = ANY (select tratament_id
+                     from fisa_medicala
+                     where observatii is not null)
+
+   --ii)Să se șteargă saloanele în care nu există pacienți.
+
+DELETE FROM salon
+WHERE salon_id <> ALL (select salon_id
+                        from pacient)
+
+   --iii)Să se seteze durata tratamentului la 100 de zile celor diagnosticați cu diabet zaharat.
+
+UPDATE tratament
+SET durata = 100
+where tratament_id = ANY(
+    select fm.tratament_id
+    from tratament t
+    join fisa_medicala fm on fm.tratament_id = t.tratament_id
+    join pacient p on p.fisa_id = fm.fisa_id
+    join consultatie c on c.consultatie_id = fm.consultatie_id
+    where lower(c.diagnostic) like '%diabet%zaharat%'
+) 
+
+--13)
+
+INSERT INTO doctor (doctor_id,nume, prenume, salariu, specializare, data_angajare)
+VALUES (.., '..', '..', .., '..', '..'); 
+
+INSERT INTO asistent (asistent_id, nume, prenume, doctor_id)
+VALUES (.., '..', '..', ..)
+
+INSERT INTO consultatie (consultatie_id, data, diagnostic)
+VALUES (.., '..', '..')
+
+INSERT INTO fisa_medicala (fisa_id, consultatie_id, tratament_id, observatii)
+VALUES (.., .., .., '..')
+
+INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (.., ..)
+
+INSERT INTO pacient (pacient_id, nume, prenume, fisa_id, salon_id, data_internare, data_externare)
+VALUES (.., '..', '..', .., .., '..', '..')
+
+INSERT INTO salon (salon_id, asistent_id, sectie_id)
+VALUES (.., .., ..)
+
+INSERT INTO sectie (sectie_id, nr_saloane, capacitate, nume_sectie)
+VALUES (.., .., .., '..')
+
+INSERT INTO tratament (tratament_id, nume, durata, cost)
+VALUES (.., '..', .., ..)
+
+--14)Am creeat un view ce conține informații (nume, prenume, diagnostic, numarul de zile petrecute in spital) despre pacienții care au stat 
+mai multe zile decât media șederii tuturor pacientilor.
+
+CREATE OR REPLACE VIEW PACIENTI_VECHI
+AS select p.nume || ' ' || p.prenume as "Nume pacient", round((select sysdate from dual) - p.data_internare,2) as "Zile petrecute in spital" , c.diagnostic
+        from pacient p
+        join fisa_medicala fm on p.fisa_id = fm.fisa_id
+        join consultatie c on fm.consultatie_id = c.consultatie_id
+        where ((select sysdate from dual) - p.data_internare) >= (
+            select avg((select sysdate from dual) - data_internare)
+            from pacient
+        )
+
+--15)Am creeat un index care să optimizeze cautarea pacientilor în funcție de data de internare
+
+CREATE INDEX pac_datai_ix
+ON pacient(data_internare);
+
+-- Acest index optimizează cerea:
+
+select nume || ' ' || prenume as "Nume pacient", salon_id Salon, data_internare as "Data internare"
+from pacient
+where data_internare >= '05.01.2021' and data_internare <= '05.31.2021'
+
+16) Să se afiseze toate sectiile din spital, indiferent dacă au saloane sau nu, iar pentru fiecare salon să se afiseze asistenta care se ocupă 
+de respectivul salon și doctorul de care aparține.
+
+
+select nume_sectie, s.salon_id, a.nume || ' ' || a.prenume as "Nume asistent", d.nume || ' ' || d.prenume as "Nume doctor"
+from sectie se
+full outer join salon s on s.sectie_id = se.sectie_id
+left join asistent a on a.asistent_id = s.asistent_id
+left join doctor d on d.doctor_id = a.doctor_id
+
+

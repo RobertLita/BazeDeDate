@@ -1,0 +1,181 @@
+--10
+create table DOCTOR(
+  DOCTOR_ID number(15) PRIMARY KEY,
+  NUME varchar2(30) NOT NULL,
+  PRENUME varchar2(30) NOT NULL,
+  SALARIU number(10,2) NOT NULL,
+  SPECIALIZARE varchar2(30) NOT NULL,
+  DATA_ANGAJARE date NOT NULL
+);
+
+create table ASISTENT(
+  ASISTENT_ID number(15) PRIMARY KEY,
+  NUME varchar2(30) NOT NULL,
+  PRENUME varchar2(30) NOT NULL,
+  DOCTOR_ID number(15) NOT NULL
+);
+
+create table CONSULTATIE(
+  CONSULTATIE_ID number(15) PRIMARY KEY,
+  DATA date NOT NULL,
+  DIAGNOSTIC varchar2(30) NOT NULL
+);
+
+create table FISA_MEDICALA(
+  FISA_ID number(15) PRIMARY KEY,
+  CONSULTATIE_ID number(15) NOT NULL,
+  TRATAMENT_ID number(15) NOT NULL,
+  OBSERVATII varchar2(200) 
+);
+
+create table FISA_TRATAMENT(
+  TRATAMENT_ID number(30) NOT NULL,
+  FISA_ID number(30) NOT NULL
+);
+
+create table PACIENT(
+  PACIENT_ID number(15) PRIMARY KEY,
+  NUME varchar2(30) NOT NULL,
+  PRENUME varchar2(30) NOT NULL,
+  FISA_ID number(15) NOT NULL,
+  SALON_ID number(15) NOT NULL,
+  DATA_INTERNARE date NOT NULL,
+  DATA_EXTERNARE date
+);
+
+create table SALON
+  SALON_ID number(15) PRIMARY KEY,
+  ASISTENT_ID number(15) NOT NULL,
+  SECTIE_ID number(15) NOT NULL
+);
+
+create table SECTIE(
+  SECTIE_ID number(15) PRIMARY KEY,
+  NR_SALOANE number(5) NOT NULL,
+  CAPACITATE number(15) NOT NULL,
+  NUME_SECTIE varchar2(30) NOT NULL
+);
+
+create table TRATAMENT(
+  TRATAMENT_ID number(15) PRIMARY KEY,
+  NUME varchar2(30) NOT NULL,
+  DURATA number(5) NOT NULL,
+  COST number(10,2) NOT NULL
+);
+
+--inserare
+   INSERT INTO doctor (doctor_id,nume, prenume, salariu, specializare, data_angajare)
+VALUES (1, 'POPESCU', 'MIHNEA', 45000.99, 'ORTODONTIE', '05.30.2021');
+   INSERT INTO doctor (doctor_id,nume, prenume, salariu, specializare, data_angajare)
+VALUES (2, 'GEORGESCU', 'VASILE', 40000.5, 'NEUROLOGIE', '10.25.2020');
+   INSERT INTO doctor (doctor_id,nume, prenume, salariu, specializare, data_angajare)
+VALUES (3, 'OPREA', 'CORNEL', 12043.22, 'CHIRURGIE', '12.24.2020');
+   INSERT INTO doctor (doctor_id,nume, prenume, salariu, specializare, data_angajare)
+VALUES (4, 'ISTRATE', 'MIHAELA', 22222.22, 'CARDIOLOGIE', '03.15.2021');
+   INSERT INTO doctor (doctor_id,nume, prenume, salariu, specializare, data_angajare)
+VALUES (5, 'STANCU', 'LACRAMIOARA', 15500, 'RADIOLOGIE', '05.30.2021');
+   INSERT INTO doctor (doctor_id,nume, prenume, salariu, specializare, data_angajare)
+VALUES (6, 'VALERIU', 'STEFAN', 10000, 'CHIRURGIE', '07.01.2013');
+   INSERT INTO doctor (doctor_id,nume, prenume, salariu, specializare, data_angajare)
+VALUES (7, 'MIHAILA', 'GETA', 9000, 'CHIRURGIE', '04.05.2020');
+
+   INSERT INTO asistent (asistent_id, nume, prenume, doctor_id)
+VALUES (1, 'POPA', 'ALEXANDRU', 5)
+   INSERT INTO asistent (asistent_id, nume, prenume, doctor_id)
+VALUES (2, 'POPESCU', 'VICTORIA', 1)
+   INSERT INTO asistent (asistent_id, nume, prenume, doctor_id)
+VALUES (3, 'VASILE', '	MARIA', 4)
+   INSERT INTO asistent (asistent_id, nume, prenume, doctor_id)
+VALUES (4, 'TOMESCU', 'ROBERT', 2)
+   INSERT INTO asistent (asistent_id, nume, prenume, doctor_id)
+VALUES (5, 'IONESCU', '	TEODORA', 3)
+ 
+   INSERT INTO sectie (sectie_id, nr_saloane, capacitate, nume_sectie)
+VALUES (1, 10, 100, 'DERMATOLOGIE')
+   INSERT INTO sectie (sectie_id, nr_saloane, capacitate, nume_sectie)
+VALUES (2, 5, 25, 'NEUROLOGIE')
+   INSERT INTO sectie (sectie_id, nr_saloane, capacitate, nume_sectie)
+VALUES (3, 7, 56, 'TERAPIE INTENSIVA')
+   INSERT INTO sectie (sectie_id, nr_saloane, capacitate, nume_sectie)
+VALUES (4, 6, 30, 'NASTERI')
+   INSERT INTO sectie (sectie_id, nr_saloane, capacitate, nume_sectie)
+VALUES (5, 4, 40, 'FRACTURI')
+
+   INSERT INTO salon (salon_id, asistent_id, sectie_id)
+VALUES (1, 4, 2)
+   INSERT INTO salon (salon_id, asistent_id, sectie_id)
+VALUES (2, 1, 2)
+   INSERT INTO salon (salon_id, asistent_id, sectie_id)
+VALUES (3, 5, 2)
+   INSERT INTO salon (salon_id, asistent_id, sectie_id)
+VALUES (4, 5, 2)
+   INSERT INTO salon (salon_id, asistent_id, sectie_id)
+VALUES (5, 4, 3)
+
+   INSERT INTO consultatie (consultatie_id, data, diagnostic)
+VALUES (1, '05.30.2021', 'GASTRITA')
+   INSERT INTO consultatie (consultatie_id, data, diagnostic)
+VALUES (2, '12.24.2020', 'APENDICITA')
+   INSERT INTO consultatie (consultatie_id, data, diagnostic)
+VALUES (3, '05.01.2020', 'FRACTURA DE MEMBRU INFERIOR')
+   INSERT INTO consultatie (consultatie_id, data, diagnostic)
+VALUES (4, '03.22.2021', 'MIOPIE')
+   INSERT INTO consultatie (consultatie_id, data, diagnostic)
+VALUES (5, '09.01.2009', 'DIABET ZAHARAT')
+
+   INSERT INTO tratament (tratament_id, nume, durata, cost)
+VALUES (1, 'REGIM ALIMENTAR', 14, 1000)
+   INSERT INTO tratament (tratament_id, nume, durata, cost)
+VALUES (2, 'MEDICAMENTE', 7, 200)
+   INSERT INTO tratament (tratament_id, nume, durata, cost)
+VALUES (3, 'INTERVENTIE CHIRURGICALA', 1, 1200)
+   INSERT INTO tratament (tratament_id, nume, durata, cost)
+VALUES (4, 'REPAUS FIZIC', 70, 0)
+   INSERT INTO tratament (tratament_id, nume, durata, cost)
+VALUES (5, 'INTERVENTIE CHIRURGICALA', 1, 1520.5)
+ 
+   INSERT INTO fisa_medicala (fisa_id, consultatie_id, tratament_id, observatii)
+VALUES (1, 2, 5)
+   INSERT INTO fisa_medicala (fisa_id, consultatie_id, tratament_id, observatii)
+VALUES (2, 3, 3, 'Dupa operatie, pacientul va avea nevoie de sedinte de recuperare a mobilitatii.')
+   INSERT INTO fisa_medicala (fisa_id, consultatie_id, tratament_id, observatii)
+VALUES (3, 4, 1, 'Pacientul a avut parte de o recuperare grea.')
+   INSERT INTO fisa_medicala (fisa_id, consultatie_id, tratament_id, observatii)
+VALUES (4, 1, 2)
+   INSERT INTO fisa_medicala (fisa_id, consultatie_id, tratament_id, observatii)
+VALUES (5, 5, 3)
+
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (1, 4)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (2, 3) 
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (3, 2)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (1, 2)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (5, 1)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (3, 4)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (2, 1)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (3, 1)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (5, 5)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (4, 2)
+   INSERT INTO fisa_tratament (tratament_id, fisa_id)
+VALUES (4, 5)
+
+   INSERT INTO pacient (pacient_id, nume, prenume, fisa_id, salon_id, data_internare, data_externare)
+VALUES (1, 'PASCU', 'REMUS', 3, 3, '04.20.2010')
+   INSERT INTO pacient (pacient_id, nume, prenume, fisa_id, salon_id, data_internare, data_externare)
+VALUES (2, 'IONESCU', 'GEORGE', 4, 5, '04.20.2019')
+   INSERT INTO pacient (pacient_id, nume, prenume, fisa_id, salon_id, data_internare, data_externare)
+VALUES (3, 'TOMA', 'ANDREI', 1, 1, '09.01.2014', '09.11.2014')
+   INSERT INTO pacient (pacient_id, nume, prenume, fisa_id, salon_id, data_internare, data_externare)
+VALUES (4, 'ENESCU', 'LIVIA', 5, 2, '03.30.2021')
+   INSERT INTO pacient (pacient_id, nume, prenume, fisa_id, salon_id, data_internare, data_externare)
+VALUES (5, 'DOVLEAC', 'FLORIN', 2, 4, '11.25.2020', '12.05.2020')
+   
